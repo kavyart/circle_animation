@@ -4,19 +4,40 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rive/rive.dart';
 
-void main() => runApp(AnimationApp());
+void main() => runApp(MyApp());
 
-class AnimationApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      //debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        textTheme: GoogleFonts.openSansTextTheme(
+        scaffoldBackgroundColor: Colors.black,
+        textTheme: GoogleFonts.staatlichesTextTheme(
             Theme.of(context).textTheme
         ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.teal,
+          shadowColor: Colors.tealAccent,
+          elevation: 100,
+          titleTextStyle: GoogleFonts.staatliches(
+            fontSize: 50,
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            primary: Colors.white,
+            backgroundColor: Colors.teal.shade800,
+            shadowColor: Colors.tealAccent,
+            elevation: 50,
+            textStyle: GoogleFonts.staatliches(
+              fontSize: 25,
+            ),
+            minimumSize: Size(200, 50),
+          ),
+        ),
       ),
-      home: PlayAnimation(),
+      home: Homepage(),
     );
   }
 }
@@ -63,49 +84,31 @@ class _PlayAnimationState extends State<PlayAnimation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //backgroundColor: Colors.grey,
+      appBar: AppBar(
+          toolbarHeight: 150,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(100),
+            ),
+          ),
+          title: Text(
+            'Circle Animation',
+            style: GoogleFonts.staatliches(fontSize: 50),
+          ),
+      ),
       body: InkWell(
         onTap: () => _pressInput?.value = true,
         child: Center(
-          child: Rive(
-            artboard: _riveArtboard!,
-          ),
-        ),
-      ),
-    );
-  }
-
-/*
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey,
-      appBar: AppBar(
-        title: const Text('Button State Machine'),
-      ),
-      body: Center(
-        child: _riveArtboard == null
-            ? const SizedBox()
-            : MouseRegion(
-          //onEnter: (_) => _hoverInput?.value = true,
-          //onExit: (_) => _hoverInput?.value = false,
-          child: GestureDetector(
-            onTapDown: (_) => _pressInput?.value = true,
-            //onTapCancel: () => _pressInput?.value = false,
-            //onTapUp: (_) => _pressInput?.value = false,
-            child: SizedBox(
-              width: 250,
-              height: 250,
-              child: Rive(
-                artboard: _riveArtboard!,
-              ),
+          child: Hero(
+            tag: 'circle',
+            child: Rive(
+              artboard: _riveArtboard!,
             ),
           ),
         ),
       ),
     );
   }
-  */
 }
 
 
@@ -117,10 +120,37 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  String name = '';
+
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF111111),
+      appBar: AppBar(
+        toolbarHeight: 150,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(100),
+          ),
+        ),
+        title: Text(
+          name != '' ? "$name's Home Page" : "Home Page",
+          style: GoogleFonts.staatliches(fontSize: 50),
+        ),
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -129,7 +159,7 @@ class _HomepageState extends State<Homepage> {
           TextField(
             decoration: InputDecoration(
               border: InputBorder.none,
-              hintText: "0",
+              hintText: "Enter Name Here",
               hintStyle: TextStyle(
                 fontSize: 32,
                 color: Colors.white.withAlpha(90),
@@ -140,18 +170,103 @@ class _HomepageState extends State<Homepage> {
               fontSize: 32,
               color: Colors.white,
             ),
+
+            controller: _controller,
+            onSubmitted: (String value) async {
+              setState(() {
+                name = value;
+              });
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Hello!'),
+                    content: Text(
+                        'Welcome to your app ${_controller.text}!'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
 
           // Spacing
           SizedBox(
-            height: 32,
+            height: 15,
           ),
 
           // Start/Stop Button
           TextButton(
-            onPressed: () {},
-            child: Text("Start Animation"),
+            onPressed: () {
+              setState(() {
+                name = _controller.text.toString();
+              });
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Hello!'),
+                    content: Text(
+                        'Welcome to your app ${_controller.text}!'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: Text("Name Entered"),
           ),
+
+          // Spacing
+          SizedBox(
+            height: 50,
+          ),
+
+          // Go to circle animation
+          Container(
+            height: 200,
+            width: 200,
+            child: GestureDetector(
+              onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) {
+                    return PlayAnimation();
+                  }));
+              },
+              child: Hero(
+                  tag: 'circle',
+                  child: RiveAnimation.asset(
+                    'assets/flutter_circle.riv',
+                    animations: ['Full Turn'],
+                  ),
+              ),
+            ),
+          ),
+          // Spacing
+          SizedBox(
+            height: 15,
+          ),
+          TextButton(
+            child: Text('Open Animation'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PlayAnimation()),
+              );
+            },
+          )
         ],
       ),
     );
